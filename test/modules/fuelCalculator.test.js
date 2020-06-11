@@ -13,7 +13,7 @@ describe('calculateFuel', () => {
 })
 
 describe('calculateRecursiveFuel', () => {
-  test('calculates fuel correctly', () => {
+  test('calculates additional fuel correctly', () => {
     expect(calculateRecursiveFuel(0)).toBe(0)
     expect(calculateRecursiveFuel(1)).toBe(0)
     expect(calculateRecursiveFuel(14)).toBe(2)
