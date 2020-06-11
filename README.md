@@ -1,3 +1,7 @@
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cemusta/aoc-2019/blob/master/LICENSE)
+[![GitHub actions](https://github.com/cemusta/aoc-2019/workflows/Node.js%20CI/badge.svg)](https://github.com/cemusta/aoc-2019/actions)
+[![CodeFactor](https://www.codefactor.io/repository/github/cemusta/aoc-2019/badge)](https://www.codefactor.io/repository/github/cemusta/aoc-2019)
+[![codecov](https://codecov.io/gh/cemusta/aoc-2019/branch/master/graph/badge.svg)](https://codecov.io/gh/cemusta/aoc-2019)
 
 # Advent of Code 2019
 
@@ -9,7 +13,7 @@ For information about Advent of Code check here: <https://adventofcode.com/2019/
 
 ## Progress
 
-2 out of 50 stars.
+3 out of 50 stars.
 
-![progress](https://progress-bar.dev/4)
+![](https://progress-bar.dev/6)
 
