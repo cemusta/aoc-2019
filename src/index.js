@@ -51,14 +51,14 @@ const searchForOutput = (searchedResult = 19690720) => {
 const findWireIntersection = () => {
   const wires = fs.readFileSync('./inputs/day3.input', 'utf8').split('\n')
   const result = nearestIntersection(wires[0], wires[1])
-  logger.info(`Day 3: closest wire intersection is ${result}`)
+  logger.info(`Day 3: closest wire intersection is ${result[0]}, shortest steps is ${result[1]}`)
   return result
 }
 
 logger.info('task starting')
 // call needed operation here
 
-// findWireIntersection()
+findWireIntersection()
 
 module.exports = {
   launchCalculation,

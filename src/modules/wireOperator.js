@@ -4,26 +4,31 @@ const nearestIntersection = (first, second) => {
   let grid = {
     '0.0': 0
   }
-  grid = mapGrip(first, grid, 1)
-  grid = mapGrip(second, grid, 2)
+  grid = mapWireGrid(first, grid, 1)
+  grid = mapWireGrid(second, grid, 2)
 
-  let min = null
+  let minimumDistance = null
+  let minimumSteps = null
   for (const coordinate in grid) {
     if (grid[coordinate] === 3) {
-      const value = calculateCoordinateDistance(coordinate)
-      if (!min || min > value) {
-        min = value
+      const distance = calculateCoordinateDistance(coordinate)
+      if (!minimumDistance || minimumDistance > distance) {
+        minimumDistance = distance
+      }
+      const steps = calculateSteps(coordinate, first) + calculateSteps(coordinate, second)
+      if (!minimumSteps || minimumSteps > steps) {
+        minimumSteps = steps
       }
     }
   }
-  return min
+  return [minimumDistance, minimumSteps]
 }
 
-const mapGrip = (input, grid, cableId) => {
+const mapWireGrid = (input, grid, cableId) => {
   grid.x = 0
   grid.y = 0
 
-  input.split(',').forEach(e => {
+  for (const e of input.split(',')) {
     const direction = e.charAt(0)
     const number = Number(e.substr(1))
     for (let i = 0; i < number; i++) {
@@ -31,7 +36,8 @@ const mapGrip = (input, grid, cableId) => {
       grid = updateGrid(grid, cableId)
     }
     logger.info(`${direction} ${number}`)
-  })
+  }
+
   delete grid.x
   delete grid.y
   return grid
@@ -55,4 +61,28 @@ const calculateCoordinateDistance = (coordinateKey) => {
   return Math.abs(x) + Math.abs(y)
 }
 
-module.exports = { nearestIntersection, calculateCoordinateDistance }
+const calculateSteps = (coordinate, wire) => {
+  let grid = {
+    x: 0,
+    y: 0,
+    '0.0': 0
+  }
+
+  let steps = 0
+
+  for (const e of wire.split(',')) {
+    const direction = e.charAt(0)
+    const number = Number(e.substr(1))
+    for (let i = 0; i < number; i++) {
+      grid = directions[direction](grid)
+      steps++
+      if (coordinate === `${grid.x}.${grid.y}`) {
+        return steps
+      }
+    }
+  }
+
+  return -1
+}
+
+module.exports = { nearestIntersection, calculateCoordinateDistance, calculateSteps }
