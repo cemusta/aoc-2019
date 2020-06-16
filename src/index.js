@@ -2,6 +2,7 @@
 const logger = require('./modules/logger').logger
 const { calculateRecursiveFuel } = require('./modules/fuelCalculator')
 const { run } = require('./modules/intCodeProcessor')
+const { nearestIntersection } = require('./modules/wireOperator')
 
 const fs = require('fs')
 
@@ -47,12 +48,21 @@ const searchForOutput = (searchedResult = 19690720) => {
   }
 }
 
+const findWireIntersection = () => {
+  const wires = fs.readFileSync('./inputs/day3.input', 'utf8').split('\n')
+  const result = nearestIntersection(wires[0], wires[1])
+  logger.info(`Day 3: closest wire intersection is ${result}`)
+  return result
+}
+
 logger.info('task starting')
 // call needed operation here
-searchForOutput()
+
+// findWireIntersection()
 
 module.exports = {
   launchCalculation,
   runIntCode,
-  searchForOutput
+  searchForOutput,
+  findWireIntersection
 }
