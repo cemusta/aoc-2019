@@ -3,6 +3,7 @@ const logger = require('./modules/logger').logger
 const { calculateRecursiveFuel } = require('./modules/fuelCalculator')
 const { run } = require('./modules/intCodeProcessor')
 const { nearestIntersection } = require('./modules/wireOperator')
+const { bruteForce } = require('./modules/passwordOperations')
 
 const fs = require('fs')
 
@@ -58,11 +59,10 @@ const findWireIntersection = () => {
 logger.info('task starting')
 // call needed operation here
 
-findWireIntersection()
-
 module.exports = {
   launchCalculation,
   runIntCode,
   searchForOutput,
-  findWireIntersection
+  findWireIntersection,
+  bruteForce
 }
