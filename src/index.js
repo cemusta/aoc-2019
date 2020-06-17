@@ -59,11 +59,10 @@ const findWireIntersection = () => {
 logger.info('task starting')
 // call needed operation here
 
-bruteForce(347312, 805915)
-
 module.exports = {
   launchCalculation,
   runIntCode,
   searchForOutput,
-  findWireIntersection
+  findWireIntersection,
+  bruteForce
 }

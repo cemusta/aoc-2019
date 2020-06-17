@@ -10,6 +10,24 @@ const hasAdjecentSame = (password) => {
   return pass
 }
 
+const hasAdjecentDoubleOnly = (password) => {
+  let pass = false
+  let last = null
+  let count = 1
+  password.split('').forEach((x) => {
+    if (last === x) {
+      count++
+    } else {
+      if (count === 2) {
+        pass = true
+      }
+      count = 1
+    }
+    last = x
+  })
+  return pass || (count === 2)
+}
+
 const everIncrising = (password) => {
   let pass = true
   password.split('').forEach((x, i, arr) => {
@@ -24,7 +42,7 @@ const bruteForce = (start, end) => {
   logger.info(`brute force starting at ${start}`)
   let matches = 0
   for (let curr = start; curr < end; curr++) {
-    if (hasAdjecentSame(`${curr}`) && everIncrising(`${curr}`)) {
+    if (hasAdjecentDoubleOnly(`${curr}`) && everIncrising(`${curr}`)) {
       matches++
     }
   }
@@ -35,6 +53,7 @@ const bruteForce = (start, end) => {
 
 module.exports = {
   hasAdjecentSame,
+  hasAdjecentDoubleOnly,
   everIncrising,
   bruteForce
 }
