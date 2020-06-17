@@ -59,8 +59,9 @@ const findWireIntersection = () => {
 logger.info('task starting')
 // call needed operation here
 
-runIntCode()
-// run('1,0,0,0,99')
+// day 5 part 1
+// const codeArray = fs.readFileSync('./inputs/day5.input', 'utf8')
+// run(codeArray)
 
 module.exports = {
   launchCalculation,
