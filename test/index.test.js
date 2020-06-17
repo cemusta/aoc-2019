@@ -5,6 +5,13 @@ describe('general solution', () => {
   })
 })
 
+describe('day 2 part 1 solution', () => {
+  test('should solve problem', () => {
+    const result = require('../src/index.js').runIntCode()
+    expect(result).toBe(3101878)
+  })
+})
+
 describe('day 4 part 2 solution', () => {
   test('should solve problem', () => {
     const result = require('../src/index.js').bruteForce(347312, 805915)
