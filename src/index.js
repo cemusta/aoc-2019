@@ -56,9 +56,6 @@ const findWireIntersection = () => {
   return result
 }
 
-logger.info('task starting')
-// call needed operation here
-
 module.exports = {
   launchCalculation,
   runIntCode,
