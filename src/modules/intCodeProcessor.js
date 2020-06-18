@@ -8,13 +8,11 @@ const run = (input) => {
   const array = input.split(',').map(x => Number(x))
   const index = 0
   const intCodeObject = { index, array }
-  while (true) {
-    const next = parseIntCode(intCodeObject.array[intCodeObject.index])
+  let next = parseIntCode(intCodeObject.array[intCodeObject.index])
+  while (!shouldExit(next)) {
     logger.debug(`index: ${intCodeObject.index}, op:${next.opcode}-[${next.params}]`)
-    if (shouldExit(next)) {
-      break
-    }
     opcodeLookupProcessor[next.opcode](next, intCodeObject)
+    next = parseIntCode(intCodeObject.array[intCodeObject.index])
   }
   return array
 }
