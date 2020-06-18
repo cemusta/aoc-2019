@@ -1,7 +1,7 @@
 const logger = require('./logger').logger
 var readlineSync = require('readline-sync')
 
-const validOpCodes = ['99', '01', '02', '03', '04']
+const validOpCodes = ['99', '01', '02', '03', '04', '05', '06', '07', '08']
 
 // gets string input and returns and array of integers.
 const run = (input) => {
@@ -10,7 +10,7 @@ const run = (input) => {
   const intCodeObject = { index, array }
   while (true) {
     const next = parseIntCode(intCodeObject.array[intCodeObject.index])
-    logger.debug(`index: ${intCodeObject.index}, op:${next.opcode}`)
+    logger.debug(`index: ${intCodeObject.index}, op:${next.opcode}-[${next.params}]`)
     if (shouldExit(next)) {
       break
     }
@@ -47,7 +47,11 @@ const opcodeLookupProcessor = {
   '01': (next, intCodesObject) => opAdd(next, intCodesObject),
   '02': (next, intCodesObject) => opMultiply(next, intCodesObject),
   '03': (next, intCodesObject) => opInput(next, intCodesObject),
-  '04': (next, intCodesObject) => opOutput(next, intCodesObject)
+  '04': (next, intCodesObject) => opOutput(next, intCodesObject),
+  '05': (next, intCodesObject) => opJumpIfTrue(next, intCodesObject),
+  '06': (next, intCodesObject) => opJumpIfFalse(next, intCodesObject),
+  '07': (next, intCodesObject) => opLessThan(next, intCodesObject),
+  '08': (next, intCodesObject) => opEquals(next, intCodesObject)
 }
 
 const opAdd = (next, intCodeObject) => {
@@ -77,6 +81,42 @@ const opOutput = (next, intCodeObject) => {
   const value = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
   logger.warn(`output is ${value}`)
   intCodeObject.index += 2
+}
+
+const opJumpIfTrue = (next, intCodeObject) => {
+  const valueToCheck = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
+  // logger.info(`hello ${next.opcode}-${next.params} val: ${valueToCheck}`)
+
+  if (valueToCheck !== 0) {
+    const toJump = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+    intCodeObject.index = toJump
+  } else {
+    intCodeObject.index += 3
+  }
+}
+
+const opJumpIfFalse = (next, intCodeObject) => {
+  const valueToCheck = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
+  if (valueToCheck === 0) {
+    const toJump = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+    intCodeObject.index = toJump
+  } else {
+    intCodeObject.index += 3
+  }
+}
+
+const opLessThan = (next, intCodeObject) => {
+  const first = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
+  const second = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+  writeValue(intCodeObject.index + 3, intCodeObject.array, next.params[2], (first < second) ? 1 : 0)
+  intCodeObject.index += 4
+}
+
+const opEquals = (next, intCodeObject) => {
+  const first = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
+  const second = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+  writeValue(intCodeObject.index + 3, intCodeObject.array, next.params[2], (first === second) ? 1 : 0)
+  intCodeObject.index += 4
 }
 
 const readValue = (index, array, mode) => {
