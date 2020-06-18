@@ -25,6 +25,11 @@ describe('parseOrbital', () => {
     expect(result).toStrictEqual({ center: 'COM', satellite: 'B' })
   })
 
+  test('parses and removes trailing chars from orbital inputs', () => {
+    const result = parseOrbital('COM)B\r')
+    expect(result).toStrictEqual({ center: 'COM', satellite: 'B' })
+  })
+
   test('parses orbital throws error on wrong input', () => {
     expect(() => {
       parseOrbital('X->A')

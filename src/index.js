@@ -4,7 +4,6 @@ const { calculateRecursiveFuel } = require('./modules/fuelCalculator')
 const { run } = require('./modules/intCodeProcessor')
 const { nearestIntersection } = require('./modules/wireOperator')
 const { bruteForce } = require('./modules/passwordOperations')
-const { countOrbitCheckSums } = require('./modules/orbitCalculator')
 
 const fs = require('fs')
 
@@ -57,26 +56,10 @@ const findWireIntersection = () => {
   return result
 }
 
-logger.info('task starting')
-// call needed operation here
-const count = countOrbitCheckSums(`COM)B
-B)C
-C)D
-D)E
-E)F
-B)G
-G)H
-D)I
-E)J
-J)K
-K)L`)
-logger.warn(`result : ${count}`)
-
 module.exports = {
   launchCalculation,
   runIntCode,
   searchForOutput,
   findWireIntersection,
-  bruteForce,
-  countOrbitCheckSums
+  bruteForce
 }
