@@ -8,14 +8,23 @@ G)H
 D)I
 E)J
 J)K
-K)L`
+K)L
+K)YOU
+I)SAN`
 
-const { countOrbitCheckSums, parseOrbital } = require('../../src/modules/orbitCalculator')
+const { countOrbitCheckSums, minimumTransferNeeded, parseOrbital } = require('../../src/modules/orbitCalculator')
 
 describe('countOrbitCheckSums', () => {
   test('solves test case correctly', () => {
     const count = countOrbitCheckSums(testCase)
-    expect(count).toBe(42)
+    expect(count).toBe(54)
+  })
+})
+
+describe('minimumTransferNeeded', () => {
+  test('solves test case correctly', () => {
+    const count = minimumTransferNeeded(testCase)
+    expect(count).toBe(4)
   })
 })
 
