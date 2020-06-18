@@ -16,9 +16,9 @@ const launchCalculation = () => {
 const runIntCode = () => {
   const codeArray = fs.readFileSync('./inputs/day2.input', 'utf8').split(',').map(x => Number(x))
   // manual override - 1202
-  codeArray[1] = 82
-  codeArray[2] = 62
-  const result = run(codeArray)
+  codeArray[1] = 12
+  codeArray[2] = 2
+  const result = run(codeArray.join(','))
   logger.info(`Day 2: opCode result is ${result[0]}`)
   return result[0]
 }

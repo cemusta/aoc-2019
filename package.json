@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./src",
     "dev": "nodemon ./src",
-    "test": "cross-env SILENT_LOGS=true jest",
+    "test": "cross-env SILENT_LOGS=true jest --verbose",
     "test:logs": "jest",
     "test:changes": "jest -o",
     "lint": "eslint .",
@@ -26,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "readline-sync": "^1.4.10",
     "winston": "^3.2.1"
   },
   "devDependencies": {
