@@ -12,16 +12,19 @@ class Processor {
     this.index = 0
     this.inputs = []
     this.outputs = []
+    this.status = 0
   }
 
   async start () {
-    logger.info(`${this.name} started`)
+    logger.debug(`${this.name} started`)
+    this.status = 1
     let next = parseIntCode(this.array[this.index])
     while (!shouldExit(next)) {
       logger.debug(`${this.name} index: ${this.index}, op:${next.opcode}-[${next.params}]`)
       await opcodeLookupProcessor[next.opcode](next, this)
       next = parseIntCode(this.array[this.index])
     }
+    this.status = -1
   }
 
   input (inputs) {
@@ -35,8 +38,8 @@ class Processor {
   }
 
   async output () {
-    while (this.outputs.length === 0) {
-      // logger.info(`(${intCodeObject.name}): waiting for output`)
+    while (this.status > -1 && this.outputs.length === 0) {
+      // logger.debug(`(${intCodeObject.name}): waiting for output`)
       await wait(sleepValue)
     }
     return this.outputs.shift()
@@ -56,7 +59,7 @@ const parseIntCode = (input) => {
 
 const shouldExit = (input) => {
   if (input.opcode === '99') {
-    logger.info('Exiting due to code 99')
+    logger.debug('Exiting due to code 99')
     return true
   }
   if (!validOpCodes.includes(input.opcode)) {
@@ -106,14 +109,14 @@ const opInput = async (next, intCodeObject) => {
     x = intCodeObject.inputs.shift()
   }
 
-  logger.info(`(${intCodeObject.name}):input is ${x}`)
+  logger.debug(`(${intCodeObject.name}):input is ${x}`)
   writeValue(intCodeObject.index + 1, intCodeObject.array, next.params[1], Number(x))
   intCodeObject.index += 2
 }
 
 const opOutput = (next, intCodeObject) => {
   const value = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
-  logger.warn(`(${intCodeObject.name}):output is ${value}`)
+  logger.debug(`(${intCodeObject.name}):output is ${value}`)
   intCodeObject.outputs.push(value)
   intCodeObject.index += 2
 }
