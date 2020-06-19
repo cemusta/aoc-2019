@@ -1,6 +1,6 @@
 const fs = require('fs')
 const { calculateRecursiveFuel } = require('../src/modules/fuelCalculator')
-const { run } = require('../src/modules/intCodeProcessor')
+const { Processor } = require('../src/modules/intCodeProcessor')
 const { countOrbitCheckSums, minimumTransferNeeded } = require('../src/modules/orbitCalculator')
 const { nearestIntersection } = require('../src/modules/wireOperator')
 const { bruteForce } = require('../src/modules/passwordOperations')
@@ -15,19 +15,20 @@ describe('day 1 part 2 solution', () => {
 })
 
 describe('day 2 part 1 solution', () => {
-  test('should solve problem', () => {
+  test('should solve problem', async () => {
     const codeArray = fs.readFileSync('./inputs/day2.input', 'utf8').split(',').map(x => Number(x))
     // manual override - 1202
     codeArray[1] = 12
     codeArray[2] = 2
-    const result = run(codeArray.join(','))
+    const proc = new Processor(codeArray.join(','))
+    await proc.start()
     // logger.info(`Day 2: opCode result is ${result[0]}`)
-    expect(result.array[0]).toBe(3101878)
+    expect(proc.array[0]).toBe(3101878)
   })
 })
 
 describe('day 2 part 2 solution', () => {
-  test('should solve problem', () => {
+  test('should solve problem', async () => {
     const searchedResult = 19690720
     // search for spesific IntCode output
     for (let noun = 0, verb = 0; verb < 100; verb++) {
@@ -35,14 +36,16 @@ describe('day 2 part 2 solution', () => {
 
       codeArray[1] = verb
       codeArray[2] = noun
-      const result = run(codeArray.join(','))
 
-      if (Number(result[0]) === searchedResult) {
+      const proc = new Processor(codeArray.join(','))
+      await proc.start()
+
+      if (Number(proc.array[0]) === searchedResult) {
         // logger.info(`${verb}:${noun} result ${result[0]} a match, result key: ${verb}${noun}`)
         expect(verb).toBe(84)
         expect(noun).toBe(44)
         return
-      } else if (result[0] > searchedResult) {
+      } else if (proc.array[0] > searchedResult) {
         // logger.info(`${verb}:${noun} result ${result[0]} too big`)
         if (noun < 100) {
           noun++
