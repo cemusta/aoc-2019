@@ -8,7 +8,7 @@
     "dev": "nodemon ./src",
     "test": "cross-env SILENT_LOGS=true jest --verbose",
     "test:logs": "jest",
-    "test:changes": "jest -o",
+    "test:changes": "cross-env SILENT_LOGS=true jest -o",
     "lint": "eslint .",
     "coverage": "cross-env SILENT_LOGS=true jest --collectCoverage",
     "validate": "npm-run-all lint test:changes",
