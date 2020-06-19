@@ -1,7 +1,8 @@
 const logger = require('./logger').logger
 var readlineSync = require('readline-sync')
 
-const validOpCodes = ['99', '01', '02', '03', '04', '05', '06', '07', '08']
+const validOpCodes = ['99', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+const modes = { 0: 'pos', 1: 'imm', 2: 'rel' }
 
 const sleepValue = 5
 
@@ -13,6 +14,7 @@ class Processor {
     this.inputs = []
     this.outputs = []
     this.status = 0
+    this.relBase = 0
   }
 
   async start () {
@@ -20,7 +22,7 @@ class Processor {
     this.status = 1
     let next = parseIntCode(this.array[this.index])
     while (!shouldExit(next)) {
-      logger.debug(`${this.name} index: ${this.index}, op:${next.opcode}-[${next.params}]`)
+      logger.warn(`(${this.name})->next, idx: ${this.index}, op:${next.opcode}-[${next.params}] - mem:[${this.array.length}]`)
       await opcodeLookupProcessor[next.opcode](next, this)
       next = parseIntCode(this.array[this.index])
     }
@@ -53,7 +55,7 @@ const parseIntCode = (input) => {
   const opcode = [d || 0, e || 0].join('')
   return {
     opcode,
-    params: [c || '0', b || '0', a || '0']
+    params: [modes[c] || modes[0], modes[b] || modes[0], modes[a] || modes[0]]
   }
 }
 
@@ -78,21 +80,20 @@ const opcodeLookupProcessor = {
   '05': async (next, intCodesObject) => opJumpIfTrue(next, intCodesObject),
   '06': async (next, intCodesObject) => opJumpIfFalse(next, intCodesObject),
   '07': async (next, intCodesObject) => opLessThan(next, intCodesObject),
-  '08': async (next, intCodesObject) => opEquals(next, intCodesObject)
+  '08': async (next, intCodesObject) => opEquals(next, intCodesObject),
+  '09': async (next, intCodesObject) => opSetRelBase(next, intCodesObject)
 }
 
 const opAdd = (next, intCodeObject) => {
   const index = intCodeObject.index
-  const array = intCodeObject.array
-  const sum = readValue(index + 1, array, next.params[0]) + readValue(index + 2, array, next.params[1])
+  const sum = readValue(intCodeObject, 1, next.params[0]) + readValue(intCodeObject, 2, next.params[1])
   writeValue(index + 3, intCodeObject.array, next.params[2], sum)
   intCodeObject.index += 4
 }
 
 const opMultiply = (next, intCodeObject) => {
   const index = intCodeObject.index
-  const array = intCodeObject.array
-  const sum = readValue(index + 1, array, next.params[0]) * readValue(index + 2, array, next.params[1])
+  const sum = readValue(intCodeObject, 1, next.params[0]) * readValue(intCodeObject, 2, next.params[1])
   writeValue(index + 3, intCodeObject.array, next.params[2], sum)
   intCodeObject.index += 4
 }
@@ -115,18 +116,18 @@ const opInput = async (next, intCodeObject) => {
 }
 
 const opOutput = (next, intCodeObject) => {
-  const value = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
-  logger.debug(`(${intCodeObject.name}):output is ${value}`)
+  const value = readValue(intCodeObject, 1, next.params[0])
+  logger.info(`(${intCodeObject.name}):output is ${value}`)
   intCodeObject.outputs.push(value)
   intCodeObject.index += 2
 }
 
 const opJumpIfTrue = (next, intCodeObject) => {
-  const valueToCheck = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
+  const valueToCheck = readValue(intCodeObject, 1, next.params[0])
   // logger.info(`(${intCodeObject.name}):hello ${next.opcode}-${next.params} val: ${valueToCheck}`)
 
   if (valueToCheck !== 0) {
-    const toJump = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+    const toJump = readValue(intCodeObject, 2, next.params[1])
     intCodeObject.index = toJump
   } else {
     intCodeObject.index += 3
@@ -134,9 +135,9 @@ const opJumpIfTrue = (next, intCodeObject) => {
 }
 
 const opJumpIfFalse = (next, intCodeObject) => {
-  const valueToCheck = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
+  const valueToCheck = readValue(intCodeObject, 1, next.params[0])
   if (valueToCheck === 0) {
-    const toJump = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+    const toJump = readValue(intCodeObject, 2, next.params[1])
     intCodeObject.index = toJump
   } else {
     intCodeObject.index += 3
@@ -144,37 +145,64 @@ const opJumpIfFalse = (next, intCodeObject) => {
 }
 
 const opLessThan = (next, intCodeObject) => {
-  const first = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
-  const second = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+  const first = readValue(intCodeObject, 1, next.params[0])
+  const second = readValue(intCodeObject, 2, next.params[1])
   writeValue(intCodeObject.index + 3, intCodeObject.array, next.params[2], (first < second) ? 1 : 0)
   intCodeObject.index += 4
 }
 
 const opEquals = (next, intCodeObject) => {
-  const first = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
-  const second = readValue(intCodeObject.index + 2, intCodeObject.array, next.params[1])
+  const first = readValue(intCodeObject, 1, next.params[0])
+  const second = readValue(intCodeObject, 2, next.params[1])
   writeValue(intCodeObject.index + 3, intCodeObject.array, next.params[2], (first === second) ? 1 : 0)
   intCodeObject.index += 4
 }
 
-const readValue = (index, array, mode) => {
-  if (mode === '0') {
-    return array[array[index]]
-  } else if (mode === '1') {
-    return array[index]
+const opSetRelBase = (next, intCodeObject) => {
+  const val = readValue(intCodeObject, 1, next.params[0])
+  intCodeObject.relBase += val
+  logger.debug(`relbase changed to ${intCodeObject.relBase}`)
+  intCodeObject.index += 2
+}
+
+const readValue = (intCodeObject, param, mode) => {
+  const array = intCodeObject.array
+  const index = intCodeObject.index + param
+  let where = null
+  if (mode === 'pos') {
+    where = array[index]
+  } else if (mode === 'imm') {
+    where = index
+  } else if (mode === 'rel') {
+    where = intCodeObject.relBase + array[index]
+    logger.warn(`relative read pos:(${where})  val:${array[where]}`)
+  } else {
+    throw new Error(`unknown parameter mode: ${mode}`)
   }
-  throw new Error(`unknown parameter mode: ${mode}`)
+  if (where < 0) { throw new Error('negative memory access') }
+
+  let read = array[where]
+  if (read === undefined) {
+    logger.warn('read undef -> return 0')
+    read = 0
+  }
+  return read
 }
 
 const writeValue = (index, array, mode, value) => {
-  if (mode === '0') {
-    array[array[index]] = value
-    return array
-  } else if (mode === '1') {
-    array[index] = value
-    return array
+  let where = null
+  if (mode === 'pos') {
+    where = array[index]
+  } else if (mode === 'imm') {
+    where = index
+  } else if (mode === 'rel') {
+    throw new Error('not implemented')
+  } else {
+    throw new Error(`unknown parameter mode: ${mode}`)
   }
-  throw new Error(`unknown parameter mode: ${mode}`)
+  if (where < 0) { throw new Error('negative memory access') }
+  array[where] = value
+  return array
 }
 
 function wait (timeout) {

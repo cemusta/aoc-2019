@@ -8,6 +8,7 @@ const consoleTransport = new winston.transports.Console({
   name: 'console.log',
   format: winston.format.combine(winston.format.colorize(), logFormat),
   handleExceptions: true,
+  level: process.env.LEVEL || 'warn',
   silent: process.env.SILENT_LOGS === 'true' // disable logs on test runner
 })
 const myWinstonOptions = {

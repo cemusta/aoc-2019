@@ -2,8 +2,6 @@ const { Processor } = require('../../src/modules/intCodeProcessor')
 
 describe('Processor', () => {
   test('solves intCode basic operation correctly', async () => {
-    const { Processor } = require('../../src/modules/intCodeProcessor')
-
     let processor = new Processor('1,0,0,0,99')
     await processor.start()
     expect(processor.array.join(',')).toBe('2,0,0,0,99')
@@ -76,6 +74,25 @@ describe('Processor', () => {
     await processor.start()
     expect(await processor.output()).toBe(1001)
   })
+
+  test('solves first day 9 example', async () => {
+    const puzzle = '109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99'
+    const processor = new Processor(puzzle)
+    await processor.start()
+    expect(await processor.outputs.join(',')).toBe(puzzle)
+  })
+
+  test('solves second day 9 example', async () => {
+    const processor = new Processor('1102,34915192,34915192,7,4,7,99,0')
+    await processor.start()
+    expect(await processor.output()).toBe(1219070632396864)
+  })
+
+  test('solves third day 9 example', async () => {
+    const processor = new Processor('104,1125899906842624,99')
+    await processor.start()
+    expect(await processor.output()).toBe(1125899906842624)
+  })
 })
 
 describe('parseIntCode', () => {
@@ -83,19 +100,15 @@ describe('parseIntCode', () => {
 
   test('should parse opcode inputs correctly', () => {
     expect(parseIntCode('1002'))
-      .toStrictEqual({ opcode: '02', params: ['0', '1', '0'] })
+      .toStrictEqual({ opcode: '02', params: ['pos', 'imm', 'pos'] })
     expect(parseIntCode(1002))
-      .toStrictEqual({ opcode: '02', params: ['0', '1', '0'] })
+      .toStrictEqual({ opcode: '02', params: ['pos', 'imm', 'pos'] })
     expect(parseIntCode('2'))
-      .toStrictEqual({ opcode: '02', params: ['0', '0', '0'] })
-    expect(parseIntCode('1'))
-      .toStrictEqual({ opcode: '01', params: ['0', '0', '0'] })
+      .toStrictEqual({ opcode: '02', params: ['pos', 'pos', 'pos'] })
+    expect(parseIntCode('204'))
+      .toStrictEqual({ opcode: '04', params: ['rel', 'pos', 'pos'] })
     expect(parseIntCode('10101'))
-      .toStrictEqual({ opcode: '01', params: ['1', '0', '1'] })
-    expect(parseIntCode('0'))
-      .toStrictEqual({ opcode: '00', params: ['0', '0', '0'] })
-    expect(parseIntCode(0))
-      .toStrictEqual({ opcode: '00', params: ['0', '0', '0'] })
+      .toStrictEqual({ opcode: '01', params: ['imm', 'pos', 'imm'] })
   })
 })
 
@@ -103,10 +116,11 @@ describe('readValue', () => {
   const { readValue } = require('../../src/modules/intCodeProcessor')
 
   test('should read correct values', () => {
-    expect(readValue(1, [1, 0, 0, 0, 99], '0')).toBe(1)
-    expect(readValue(0, [1, 0, 0, 0, 99], '0')).toBe(0)
-    expect(readValue(1, [1, 0, 0, 0, 99], '1')).toBe(0)
-    expect(readValue(0, [1, 0, 0, 0, 99], '1')).toBe(1)
+    const a = { array: [1, 0, 0, 0, 99], index: 0 }
+    expect(readValue(a, 1, 'pos')).toBe(1)
+    expect(readValue(a, 0, 'pos')).toBe(0)
+    expect(readValue(a, 1, 'imm')).toBe(0)
+    expect(readValue(a, 0, 'imm')).toBe(1)
   })
 })
 
@@ -114,9 +128,9 @@ describe('writeValue', () => {
   const { writeValue } = require('../../src/modules/intCodeProcessor')
 
   test('should read correct values', () => {
-    expect(writeValue(1, [1, 0, 0, 0, 99], '0', 5)).toStrictEqual([5, 0, 0, 0, 99])
-    expect(writeValue(0, [1, 0, 0, 0, 99], '0', 5)).toStrictEqual([1, 5, 0, 0, 99])
-    expect(writeValue(2, [1, 2, 0, 0, 99], '1', 5)).toStrictEqual([1, 2, 5, 0, 99])
-    expect(writeValue(3, [1, 2, 3, 0, 99], '1', 5)).toStrictEqual([1, 2, 3, 5, 99])
+    expect(writeValue(1, [1, 0, 0, 0, 99], 'pos', 5)).toStrictEqual([5, 0, 0, 0, 99])
+    expect(writeValue(0, [1, 0, 0, 0, 99], 'pos', 5)).toStrictEqual([1, 5, 0, 0, 99])
+    expect(writeValue(2, [1, 2, 0, 0, 99], 'imm', 5)).toStrictEqual([1, 2, 5, 0, 99])
+    expect(writeValue(3, [1, 2, 3, 0, 99], 'imm', 5)).toStrictEqual([1, 2, 3, 5, 99])
   })
 })
