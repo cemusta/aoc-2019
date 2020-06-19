@@ -4,17 +4,17 @@ var readlineSync = require('readline-sync')
 const validOpCodes = ['99', '01', '02', '03', '04', '05', '06', '07', '08']
 
 // gets string input and returns and array of integers.
-const run = (input) => {
-  const array = input.split(',').map(x => Number(x))
+const run = (intCodeinput, inputs = null) => {
+  const array = intCodeinput.split(',').map(x => Number(x))
   const index = 0
-  const intCodeObject = { index, array }
+  const intCodeObject = { index, array, inputs, outputs: [] }
   let next = parseIntCode(intCodeObject.array[intCodeObject.index])
   while (!shouldExit(next)) {
     logger.debug(`index: ${intCodeObject.index}, op:${next.opcode}-[${next.params}]`)
     opcodeLookupProcessor[next.opcode](next, intCodeObject)
     next = parseIntCode(intCodeObject.array[intCodeObject.index])
   }
-  return array
+  return intCodeObject
 }
 
 // returns opcode with params
@@ -69,7 +69,13 @@ const opMultiply = (next, intCodeObject) => {
 }
 
 const opInput = (next, intCodeObject) => {
-  const x = readlineSync.question(`Enter input for command (${intCodeObject.index})? `)
+  let x
+  if (intCodeObject.inputs === null) {
+    x = readlineSync.question(`Enter input for command (${intCodeObject.index})? `)
+  } else {
+    x = intCodeObject.inputs.shift()
+  }
+
   logger.info(`input is ${x}`)
   writeValue(intCodeObject.index + 1, intCodeObject.array, next.params[1], Number(x))
   intCodeObject.index += 2
@@ -78,6 +84,7 @@ const opInput = (next, intCodeObject) => {
 const opOutput = (next, intCodeObject) => {
   const value = readValue(intCodeObject.index + 1, intCodeObject.array, next.params[0])
   logger.warn(`output is ${value}`)
+  intCodeObject.outputs.push(value)
   intCodeObject.index += 2
 }
 

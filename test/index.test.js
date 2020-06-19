@@ -5,12 +5,6 @@ const { countOrbitCheckSums, minimumTransferNeeded } = require('../src/modules/o
 const { nearestIntersection } = require('../src/modules/wireOperator')
 const { bruteForce } = require('../src/modules/passwordOperations')
 
-describe('general solution', () => {
-  test('should work without a problem', () => {
-    require('../src/index.js')
-  })
-})
-
 describe('day 1 part 2 solution', () => {
   test('should solve problem', () => {
     const starshipParts = fs.readFileSync('./inputs/day1.input', 'utf8').split('\n').map(x => Number(x))
@@ -28,7 +22,7 @@ describe('day 2 part 1 solution', () => {
     codeArray[2] = 2
     const result = run(codeArray.join(','))
     // logger.info(`Day 2: opCode result is ${result[0]}`)
-    expect(result[0]).toBe(3101878)
+    expect(result.array[0]).toBe(3101878)
   })
 })
 

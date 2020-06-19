@@ -11,21 +11,15 @@ describe('run', () => {
   test('solves intCode operation correctly', () => {
     const { run } = require('../../src/modules/intCodeProcessor')
 
-    expect(run('1,0,0,0,99').join(','))
-      .toBe('2,0,0,0,99')
-    expect(run('2,3,0,3,99').join(','))
-      .toBe('2,3,0,6,99')
-    expect(run('1,1,1,4,99,5,6,0,99').join(','))
-      .toBe('30,1,1,4,2,5,6,0,99')
-    expect(run('1,1,1,4,99,5,6,0').join(','))
-      .toBe('30,1,1,4,2,5,6,0')
-    expect(run('1,9,10,3,2,3,11,0,99,30,40,50').join(','))
-      .toBe('3500,9,10,70,2,3,11,0,99,30,40,50')
+    expect(run('1,0,0,0,99').array.join(',')).toBe('2,0,0,0,99')
 
-    expect(run('1002,4,3,4,33').join(','))
-      .toBe('1002,4,3,4,99')
-    expect(run('1101,-1,-1,4,0').join(','))
-      .toBe('1101,-1,-1,4,-2')
+    expect(run('2,3,0,3,99').array.join(',')).toBe('2,3,0,6,99')
+    expect(run('1,1,1,4,99,5,6,0,99').array.join(',')).toBe('30,1,1,4,2,5,6,0,99')
+    expect(run('1,1,1,4,99,5,6,0').array.join(',')).toBe('30,1,1,4,2,5,6,0')
+    expect(run('1,9,10,3,2,3,11,0,99,30,40,50').array.join(',')).toBe('3500,9,10,70,2,3,11,0,99,30,40,50')
+
+    expect(run('1002,4,3,4,33').array.join(',')).toBe('1002,4,3,4,99')
+    expect(run('1101,-1,-1,4,0').array.join(',')).toBe('1101,-1,-1,4,-2')
   })
 
   test('solves two small puzzles with input', () => {
@@ -34,23 +28,49 @@ describe('run', () => {
     const { run } = require('../../src/modules/intCodeProcessor')
 
     mockInput.mockReturnValueOnce(0)
-    run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9').join(',')
+    run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9')
     expect(spy).toHaveBeenCalledWith('output is 0')
     spy.mockClear()
 
     mockInput.mockReturnValueOnce(1)
-    run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9').join(',')
+    run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9')
     expect(spy).toHaveBeenCalledWith('output is 1')
     spy.mockClear()
 
     mockInput.mockReturnValueOnce(0)
-    run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1').join(',')
+    run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1')
     expect(spy).toHaveBeenCalledWith('output is 0')
     spy.mockClear()
 
     mockInput.mockReturnValueOnce(1)
-    run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1').join(',')
+    run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1')
     expect(spy).toHaveBeenCalledWith('output is 1')
+    spy.mockClear()
+  })
+
+  test('solves two small puzzles with pregiven input', () => {
+    const spy = jest.spyOn(require('../../src/modules/logger').logger, 'warn')
+
+    const { run } = require('../../src/modules/intCodeProcessor')
+
+    let result = run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9', [0])
+    expect(spy).toHaveBeenCalledWith('output is 0')
+    expect(result.outputs).toStrictEqual([0])
+    spy.mockClear()
+
+    result = run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9', [1])
+    expect(spy).toHaveBeenCalledWith('output is 1')
+    expect(result.outputs).toStrictEqual([1])
+    spy.mockClear()
+
+    result = run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1', [0])
+    expect(spy).toHaveBeenCalledWith('output is 0')
+    expect(result.outputs).toStrictEqual([0])
+    spy.mockClear()
+
+    result = run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1', [1])
+    expect(spy).toHaveBeenCalledWith('output is 1')
+    expect(result.outputs).toStrictEqual([1])
     spy.mockClear()
   })
 
