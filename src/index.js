@@ -1,5 +1,5 @@
 
-// const logger = require('./modules/logger').logger
-// // const fs = require('fs')
+const logger = require('./modules/logger').logger
+// const fs = require('fs')
 
-// logger.info('solution workbench...')
+logger.info('solution workbench...')
