@@ -1,78 +1,80 @@
-beforeEach(() => {
-  jest.resetModules()
-})
+const { Processor } = require('../../src/modules/intCodeProcessor')
 
-const mockInput = jest.fn()
-jest.mock('readline-sync', () => ({
-  question: mockInput
-}))
+describe('Processor', () => {
+  test('solves intCode basic operation correctly', async () => {
+    const { Processor } = require('../../src/modules/intCodeProcessor')
 
-describe('run', () => {
-  test('solves intCode operation correctly', () => {
-    const { run } = require('../../src/modules/intCodeProcessor')
+    let processor = new Processor('1,0,0,0,99')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('2,0,0,0,99')
 
-    expect(run('1,0,0,0,99').join(','))
-      .toBe('2,0,0,0,99')
-    expect(run('2,3,0,3,99').join(','))
-      .toBe('2,3,0,6,99')
-    expect(run('1,1,1,4,99,5,6,0,99').join(','))
-      .toBe('30,1,1,4,2,5,6,0,99')
-    expect(run('1,1,1,4,99,5,6,0').join(','))
-      .toBe('30,1,1,4,2,5,6,0')
-    expect(run('1,9,10,3,2,3,11,0,99,30,40,50').join(','))
-      .toBe('3500,9,10,70,2,3,11,0,99,30,40,50')
+    processor = new Processor('2,3,0,3,99')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('2,3,0,6,99')
 
-    expect(run('1002,4,3,4,33').join(','))
-      .toBe('1002,4,3,4,99')
-    expect(run('1101,-1,-1,4,0').join(','))
-      .toBe('1101,-1,-1,4,-2')
+    processor = new Processor('1,1,1,4,99,5,6,0,99')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('30,1,1,4,2,5,6,0,99')
+
+    processor = new Processor('1,1,1,4,99,5,6,0')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('30,1,1,4,2,5,6,0')
+
+    processor = new Processor('1,9,10,3,2,3,11,0,99,30,40,50')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('3500,9,10,70,2,3,11,0,99,30,40,50')
   })
 
-  test('solves two small puzzles with input', () => {
-    const spy = jest.spyOn(require('../../src/modules/logger').logger, 'warn')
+  test('solves intCode operations with relative/immidiate positions correctly', async () => {
+    let processor = new Processor('1002,4,3,4,33')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('1002,4,3,4,99')
 
-    const { run } = require('../../src/modules/intCodeProcessor')
-
-    mockInput.mockReturnValueOnce(0)
-    run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9').join(',')
-    expect(spy).toHaveBeenCalledWith('output is 0')
-    spy.mockClear()
-
-    mockInput.mockReturnValueOnce(1)
-    run('3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9').join(',')
-    expect(spy).toHaveBeenCalledWith('output is 1')
-    spy.mockClear()
-
-    mockInput.mockReturnValueOnce(0)
-    run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1').join(',')
-    expect(spy).toHaveBeenCalledWith('output is 0')
-    spy.mockClear()
-
-    mockInput.mockReturnValueOnce(1)
-    run('3,3,1105,-1,9,1101,0,0,12,4,12,99,1').join(',')
-    expect(spy).toHaveBeenCalledWith('output is 1')
-    spy.mockClear()
+    processor = new Processor('1101,-1,-1,4,0')
+    await processor.start()
+    expect(processor.array.join(',')).toBe('1101,-1,-1,4,-2')
   })
 
-  test('solves larger example with input', () => {
-    const spy = jest.spyOn(require('../../src/modules/logger').logger, 'warn')
+  test('solves two simple puzzles with input', async () => {
+    const firstPuzzle = '3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9'
+    const secondPuzzle = '3,3,1105,-1,9,1101,0,0,12,4,12,99,1'
 
-    const { run } = require('../../src/modules/intCodeProcessor')
+    let processor = new Processor(firstPuzzle)
+    processor.input(0)
+    await processor.start()
+    expect(await processor.output()).toBe(0)
 
-    mockInput.mockReturnValueOnce(8)
-    run('3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99')
-    expect(spy).toHaveBeenCalledWith('output is 1000')
-    spy.mockClear()
+    processor = new Processor(firstPuzzle)
+    processor.input(1)
+    await processor.start()
+    expect(await processor.output()).toBe(1)
 
-    mockInput.mockReturnValueOnce(7)
-    run('3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99')
-    expect(spy).toHaveBeenCalledWith('output is 999')
-    spy.mockClear()
+    processor = new Processor(secondPuzzle)
+    processor.input(0)
+    await processor.start()
+    expect(await processor.output()).toBe(0)
 
-    mockInput.mockReturnValueOnce(88)
-    run('3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99')
-    expect(spy).toHaveBeenCalledWith('output is 1001')
-    spy.mockClear()
+    processor = new Processor(secondPuzzle)
+    processor.input(1)
+    await processor.start()
+    expect(await processor.output()).toBe(1)
+  })
+
+  test('solves larger example with input', async () => {
+    let processor = new Processor('3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99')
+    processor.input(8)
+    await processor.start()
+    expect(await processor.output()).toBe(1000)
+
+    processor = new Processor('3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99')
+    processor.input(7)
+    await processor.start()
+    expect(await processor.output()).toBe(999)
+
+    processor = new Processor('3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99')
+    processor.input(9)
+    await processor.start()
+    expect(await processor.output()).toBe(1001)
   })
 })
 
